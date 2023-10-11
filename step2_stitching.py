@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import h5py
+from customized_stitching_function import customized_function
 
 def compute_mean_intensity(
         layer_h5_path,
@@ -32,55 +33,7 @@ def find_laser_onset(onset_time_list):
     onset_layer = indices_of_min[0][0]
     return onset_time_list[onset_layer], onset_layer # 143, 10
 
-def stitch2cam_20230820fish2_1(im1, im2):
-    interp_start_pos = 12
-    shift = 7
-
-    # Rotate im2 image
-    im2 = np.flipud(np.fliplr(im2))
-
-    # Crop im1 and im2 images
-    im1 = im1[4:, :]
-    im2 = im2[:-3, :]
-
-    imwidth = im1.shape[1]
-
-    # Interpolate and shift im2 image
-    x = np.arange(1, imwidth + 1)
-    interp_x = np.linspace(interp_start_pos, imwidth, num=imwidth, endpoint=True)
-    tmp2 = np.apply_along_axis(
-        lambda col: np.interp(interp_x, x, col, left=np.nan, right=np.nan),
-        axis=0,
-        arr=im2,
-    )
-    tmp2 = np.roll(tmp2, shift, axis=1)
-
-    # Combine im2 and im1 images
-    im = np.vstack((tmp2, im1))
-
-    return im.astype(np.uint16)
-
-# Define paths
-stitch_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/fish1_1_stitched.h5'
-layer_h5_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera{}/fish1_1.h5'
-
-# Compute mean intensity of the first few frames of each z layer
-mean_intensity_cam1 = compute_mean_intensity(layer_h5_path.format(1))
-mean_intensity_cam2 = compute_mean_intensity(layer_h5_path.format(2))
-
-# Compute laser onset for each layer
-cam1_onset_per_layer = compute_laser_onset_per_layer(mean_intensity_cam1)
-cam2_onset_per_layer = compute_laser_onset_per_layer(mean_intensity_cam2)
-
-# Find the layer with the earliest laser onset
-cam1_onset_layer,cam1_onset_time = find_laser_onset(cam1_onset_per_layer)
-cam2_onset_layer,cam2_onset_time = find_laser_onset(cam2_onset_per_layer)
-
-
-def customized_function(vol1,vol2):
-    return np.concatenate((vol1,vol2),axis=1)
-
-def stich_two_cameras(
+def stitching(
     cam1_path,
     cam2_path,
     out_path,
@@ -121,7 +74,7 @@ def stich_two_cameras(
             vol2 = f[f'layer{layer_cam2}'][:,:,t2:t2+desired_len]
         
         # Stitch two volumes
-        vol = customized_function(vol1,vol2)
+        vol = np.stack([customized_function(im1,im2) for im1,im2 in zip(vol1,vol2)],axis=2)
         with h5py.File(out_path,'a') as f:
             dataset_name, data_shape, data_type = f'layer{layer_final}', vol.shape, vol.dtype 
             if dataset_name in f:
@@ -130,15 +83,34 @@ def stich_two_cameras(
                 dataset = f.create_dataset(dataset_name, data_shape, dtype=data_type)
             dataset[:] = vol
 
-stich_two_cameras(
-    cam1_path = layer_h5_path.format(1),
-    cam2_path = layer_h5_path.format(2),
-    out_path = stitch_path,
-    cam1_onset_layer = cam1_onset_layer,
-    cam1_onset_time = cam1_onset_time,
-    cam2_onset_layer = cam2_onset_layer,
-    cam2_onset_time = cam2_onset_time,
-    customized_function = customized_function,
-    offset_from_layer = 100,
-    desired_len = 6700
-)
+def combining_two_cameras(stitch_path,layer_h5_path ):
+
+    # Compute mean intensity of the first few frames of each z layer
+    mean_intensity_cam1 = compute_mean_intensity(layer_h5_path.format(1))
+    mean_intensity_cam2 = compute_mean_intensity(layer_h5_path.format(2))
+
+    # Compute laser onset for each layer
+    cam1_onset_per_layer = compute_laser_onset_per_layer(mean_intensity_cam1)
+    cam2_onset_per_layer = compute_laser_onset_per_layer(mean_intensity_cam2)
+
+    # Find the layer with the earliest laser onset
+    cam1_onset_layer,cam1_onset_time = find_laser_onset(cam1_onset_per_layer)
+    cam2_onset_layer,cam2_onset_time = find_laser_onset(cam2_onset_per_layer)
+
+    stitching(
+        cam1_path = layer_h5_path.format(1),
+        cam2_path = layer_h5_path.format(2),
+        out_path = stitch_path,
+        cam1_onset_layer = cam1_onset_layer,
+        cam1_onset_time = cam1_onset_time,
+        cam2_onset_layer = cam2_onset_layer,
+        cam2_onset_time = cam2_onset_time,
+        customized_function = customized_function,
+        offset_from_layer = 100,
+        desired_len = 6700
+    )
+
+# Define paths
+stitch_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/fish1_1_stitched.h5'
+layer_h5_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera{}/fish1_1.h5'
+combining_two_cameras(stitch_path,layer_h5_path)
