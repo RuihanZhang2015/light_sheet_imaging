@@ -27,5 +27,6 @@ def stitch2cam_0826fish5(im1, im2):
     # Concatenate (equivalent of cat in MATLAB)
     im = np.vstack((tmp2, im1)).astype(np.uint16)
     return im
+    
 # Assuming you have the images im1 and im2 loaded, you can call the function as:
 # result = stitch2cam_0826fish5(im1, im2)

@@ -180,6 +180,7 @@ def process_one_camera(meta_data_path,input_nrrd_path,all_h5_path,layer_h5_path)
 
     _PERIOD = 30
     video_initial_drops = 30
+
     frame_numers = retrieve_framenumbers(meta_data_path)
     frame_indexes_per_layer = assign_layer(frame_numers, video_initial_drops)
 
@@ -205,12 +206,6 @@ def process_one_camera(meta_data_path,input_nrrd_path,all_h5_path,layer_h5_path)
 
 if __name__ == '__main__':
 
-    # Parse metadata
-    video_initial_drops = 30
-    frame_numers = retrieve_framenumbers(meta_data_path)
-    frame_indexes_per_layer = assign_layer(frame_numers, video_initial_drops)
-
-    # Get the entire volume
     meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish1_1.xiseq'
     input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish1/fish1_1_{}.nrrd'
     all_h5_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera1/fish1_1_raw.h5'

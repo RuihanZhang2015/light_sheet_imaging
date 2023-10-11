@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import h5py
-from customized_stitching_function import customized_function
+
 
 def compute_mean_intensity(
         layer_h5_path,
@@ -110,7 +110,13 @@ def combining_two_cameras(stitch_path,layer_h5_path ):
         desired_len = 6700
     )
 
-# Define paths
-stitch_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/fish1_1_stitched.h5'
-layer_h5_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera{}/fish1_1.h5'
-combining_two_cameras(stitch_path,layer_h5_path)
+if name == '__main__':
+    
+    # Define paths
+    stitch_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/fish1_1_stitched.h5'
+    layer_h5_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera{}/fish1_1.h5'
+    
+    # import your costomized function
+    from customized_stitching_function import customized_function
+    
+    combining_two_cameras(stitch_path,layer_h5_path)
