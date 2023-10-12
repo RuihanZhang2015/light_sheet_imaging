@@ -7,4 +7,4 @@
 #SBATCH --constraint=rocky8
 source ~/.bash_profile
 conda activate zeguan
-python -u /om2/user/ruihanz/zeguan/step1_reorganize_layers.py
+python -u /om2/user/ruihanz/zeguan/step2_stitching.py
