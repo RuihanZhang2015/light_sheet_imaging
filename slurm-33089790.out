@@ -1,0 +1,6 @@
+loading zgwang's setting
+/home/zgwang/.bash_profile: line 8: module: command not found
+/home/zgwang/.bash_profile: line 9: module: command not found
+/home/zgwang/.bash_profile: line 10: module: command not found
+/var/slurm/slurmd/job33089790/slurm_script: line 9: conda: command not found
+/var/slurm/slurmd/job33089790/slurm_script: line 10: python: command not found

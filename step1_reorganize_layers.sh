@@ -6,5 +6,6 @@
 #SBATCH --mem=256GB          
 #SBATCH --constraint=rocky8
 source ~/.bash_profile
-conda activate zeguan
+source /etc/profile.d/modules.sh
+conda activate voltage
 python -u /om2/user/zgwang/light_sheet_imaging/step1_reorganize_layers.py

@@ -26,26 +26,26 @@ def retrieve_framenumbers(meta_data_path):
     return frameNumbers 
 
 
-def nrrd_to_h5(input_nrrd_path, chunk_index, all_path):
+def nrrd_to_h5(input_nrrd_path, chunk_index, raw_path):
     '''
     Convert nrrd files to h5 files.
     Input:
         input_nrrd_path: path to the nrrd file.
         chunk_index: index of the chunk.
-        all_path: path to the output h5 file.
+        raw_path: path to the output h5 file.
     Output:
         A h5 file with 21 datasets, one for each chunk, named as f['{chunk_index}']
     '''
 
     print(f'processing {chunk_index}')
-    h5_folder_path = os.path.dirname(all_path)
+    h5_folder_path = os.path.dirname(raw_path)
     print('h5_folder_path', h5_folder_path)
     os.makedirs(h5_folder_path, exist_ok=True)
 
     nrrd_data,_ = nrrd.read(input_nrrd_path)
     nrrd_data = np.transpose(nrrd_data, (1, 0, 2))
 
-    with h5py.File(all_path,'a') as f:
+    with h5py.File(raw_path,'a') as f:
         dataset_name = f'{chunk_index}'  # Name of the dataset in HDF5
         data_shape = nrrd_data.shape  # Shape of the NRRD data
         data_type = nrrd_data.dtype  # Data type of the NRRD data
@@ -93,7 +93,7 @@ def assign_layer(frame_numbers, video_initial_drops):
 def process_layer(
         layer_index, 
         frame_indexes_per_layer, 
-        all_path, 
+        raw_path, 
         layer_path,
         debug = False,
         height = 256,
@@ -103,7 +103,7 @@ def process_layer(
     Input:
         layer_index: index of the layer.
         frame_indexes_per_layer: a dictionary of layer and corresponding frame numbers.
-        all_path: path to the input h5 file, with 21 datasets, one for each chunk, named as f['{chunk_index}']
+        raw_path: path to the input h5 file, with 21 datasets, one for each chunk, named as f['{chunk_index}']
         layer_path: path to the output h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
         debug: if True, only process the first 300 frames.
         height: height of the image.
@@ -116,7 +116,7 @@ def process_layer(
         frame_indexes = frame_indexes[:300]
     print(len(frame_indexes))
     layer = np.zeros((height, width, len(frame_indexes)), dtype=np.uint16)
-    with h5py.File(all_path,'r') as f:
+    with h5py.File(raw_path,'r') as f:
         for i, frame_index in enumerate(frame_indexes):
             layer[:,:,i] = f.get(f'{frame_index//10000+1}')[:,:,frame_index%10000]
     
@@ -166,13 +166,13 @@ def check_layer(layer_path, layer_index, save_dir = '/om2/user/zgwang/light_shee
 #     plt.savefig('/om2/user/zgwangz/zeguan/t50.png')
 
 
-def process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, video_initial_drops = 30, debug = False):
+def process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, video_initial_drops = 30, debug = False):
     '''
     Process all the data from one camera.
     Input:
         meta_data_path: path to the metafile.
         input_nrrd_path: path to the nrrd file.
-        all_path: path to the output h5 file with 21 datasets, one for each chunk, named as f['{chunk_index}']
+        raw_path: path to the output h5 file with 21 datasets, one for each chunk, named as f['{chunk_index}']
         layer_path: path to the output h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
     Output: 
         A h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
@@ -183,30 +183,36 @@ def process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, video
 
     # Convert nrrd to h5
     for chunk_index in range(1,22):
-        nrrd_to_h5(input_nrrd_path.format(chunk_index), chunk_index, all_path)
+        nrrd_to_h5(input_nrrd_path.format(chunk_index), chunk_index, raw_path)
 
     # Reorganize the layers
     for layer_index in range(_PERIOD):
         print('processing layer', layer_index)
-        process_layer(layer_index, frame_indexes_per_layer, all_path, layer_path, debug = debug)
+        process_layer(layer_index, frame_indexes_per_layer, raw_path, layer_path, debug = debug)
 
 
 if __name__ == '__main__':
 
-    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish1_1.xiseq'
-    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish1/fish1_1_{}.nrrd'
-    all_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera1/fish1_1_raw.h5'
-    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera1/fish1_1.h5'
-    # process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = True) 
-    process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = False) 
+    # meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish1_1.xiseq'
+    # input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish1/fish1_1_{}.nrrd'
+    # raw_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1_1/camera1/raw.h5'
+    # layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1_1/camera1/layer.h5'
+    # # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = True) 
+    # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = False) 
     
-    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish1_1.xiseq'
-    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish1/fish1_1_{}.nrrd'
-    all_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1_raw.h5'
-    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1.h5'
-    # process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = True) 
-    process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = False) 
+    # meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish1_1.xiseq'
+    # input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish1/fish1_1_{}.nrrd'
+    # raw_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1_1/camera2/raw.h5'
+    # layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1_1/camera2/layer.h5'
+    # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = True) 
+    # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = False) 
 
-
+    # nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3
+    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish3_1.xiseq'
+    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3/fish3_1_{}.nrrd'
+    raw_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/raw.h5'
+    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/layer.h5'
+    process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = True) 
+    # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = False)
     
     
