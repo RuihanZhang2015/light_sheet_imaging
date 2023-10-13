@@ -136,7 +136,7 @@ def process_layer(
             dataset[:] = layer
 
 
-def check_layer(layer_path, layer_index, save_dir = '/om2/user/ruihanz/zeguan/image'):
+def check_layer(layer_path, layer_index, save_dir = '/om2/user/zgwang/light_sheet_imaging/image'):
     '''
     Plot the mean intensity of each layer to see if it is continuous to knwo if the layer is processed correctly.
     Input:
@@ -163,7 +163,7 @@ def check_layer(layer_path, layer_index, save_dir = '/om2/user/ruihanz/zeguan/im
 #             vol.append(f[f'layer{layer_index}'][:,x,y])
 #     vol = np.array(vol)
 #     plt.imshow(vol,vmax = 300)
-#     plt.savefig('/om2/user/ruihanz/zeguan/t50.png')
+#     plt.savefig('/om2/user/zgwangz/zeguan/t50.png')
 
 
 def process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, video_initial_drops = 30, debug = False):
@@ -195,15 +195,15 @@ if __name__ == '__main__':
 
     meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish1_1.xiseq'
     input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish1/fish1_1_{}.nrrd'
-    all_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera1/fish1_1_raw.h5'
-    layer_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera1/fish1_1.h5'
+    all_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera1/fish1_1_raw.h5'
+    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera1/fish1_1.h5'
     # process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = True) 
     process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = False) 
     
     meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish1_1.xiseq'
     input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish1/fish1_1_{}.nrrd'
-    all_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1_raw.h5'
-    layer_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1.h5'
+    all_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1_raw.h5'
+    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1.h5'
     # process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = True) 
     process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = False) 
 
