@@ -182,7 +182,7 @@ def process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, video
     frame_indexes_per_layer = assign_layer(frame_numers, video_initial_drops)
 
     # Convert nrrd to h5
-    for chunk_index in range(1,21):
+    for chunk_index in range(1,22):
         nrrd_to_h5(input_nrrd_path.format(chunk_index), chunk_index, all_path)
 
     # Reorganize the layers
