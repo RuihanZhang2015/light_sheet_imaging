@@ -182,7 +182,7 @@ def process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, video
     frame_indexes_per_layer = assign_layer(frame_numers, video_initial_drops)
 
     # Convert nrrd to h5
-    for chunk_index in range(1,21):
+    for chunk_index in range(1,22):
         nrrd_to_h5(input_nrrd_path.format(chunk_index), chunk_index, all_path)
 
     # Reorganize the layers
@@ -200,12 +200,12 @@ if __name__ == '__main__':
     # process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = True) 
     process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = False) 
     
-    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish1_1.xiseq'
-    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish1/fish1_1_{}.nrrd'
-    all_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1_raw.h5'
-    layer_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1.h5'
-    # process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = True) 
-    process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = False) 
+    # meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish1_1.xiseq'
+    # input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish1/fish1_1_{}.nrrd'
+    # all_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1_raw.h5'
+    # layer_path = '/nese/mit/group/boydenlab/ruihan/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish1/camera2/fish1_1.h5'
+    # # process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = True) 
+    # process_one_camera(meta_data_path,input_nrrd_path,all_path,layer_path, debug = False) 
 
 
     

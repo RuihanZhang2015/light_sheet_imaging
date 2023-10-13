@@ -190,7 +190,7 @@ def plot_stitched(out_path, layer_index = 0, save_dir = '/om2/user/ruihanz/zegua
         img = f[f'layer{layer_index}'][:,:,25]
     plt.figure()
     plt.imshow(img,vmax = 200)
-    plt.savefig(os.path.join(os.path.dirname(save_dir),f'stitched_{layer_index}.jpg'))
+    plt.savefig(os.path.join(save_dir,f'stitched_{layer_index}.jpg'))
     plt.close()
 
 def combining_two_cameras(layer_path, stitch_path, desired_len, offset_time):
@@ -265,4 +265,4 @@ if __name__ == '__main__':
 
     # EXAMINE
     for layer_index in range(30):
-        plot_stitched(stitch_path,layer_index, save_dir = '/om2/user/ruihanz/zeguan/image'):
+        plot_stitched(stitch_path,layer_index, save_dir = '/om2/user/ruihanz/zeguan/image')
