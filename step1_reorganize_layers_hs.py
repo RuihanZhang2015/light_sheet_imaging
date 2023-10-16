@@ -90,50 +90,50 @@ def assign_layer(frame_numbers, video_initial_drops):
     return final
 
 
-def process_layer(
-        layer_index, 
-        frame_indexes_per_layer, 
-        raw_path, 
-        layer_path,
-        debug = False,
-        height = 256,
-        width = 1280):
-    '''
-    Put together the slices that belong to each layer.
-    Input:
-        layer_index: index of the layer.
-        frame_indexes_per_layer: a dictionary of layer and corresponding frame numbers.
-        raw_path: path to the input h5 file, with 21 datasets, one for each chunk, named as f['{chunk_index}']
-        layer_path: path to the output h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
-        debug: if True, only process the first 300 frames.
-        height: height of the image.
-        width: width of the image.
-    Output:
-        A h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
-    '''
-    frame_indexes = frame_indexes_per_layer[layer_index]
-    if debug:
-        frame_indexes = frame_indexes[:300]
-    print(len(frame_indexes))
-    layer = np.zeros((height, width, len(frame_indexes)), dtype=np.uint16)
-    with h5py.File(raw_path,'r') as f:
-        for i, frame_index in enumerate(frame_indexes):
-            layer[:,:,i] = f.get(f'{frame_index//10000+1}')[:,:,frame_index%10000]
+# def process_layer(
+#         layer_index, 
+#         frame_indexes_per_layer, 
+#         raw_path, 
+#         layer_path,
+#         debug = False,
+#         height = 256,
+#         width = 1280):
+#     '''
+#     Put together the slices that belong to each layer.
+#     Input:
+#         layer_index: index of the layer.
+#         frame_indexes_per_layer: a dictionary of layer and corresponding frame numbers.
+#         raw_path: path to the input h5 file, with 21 datasets, one for each chunk, named as f['{chunk_index}']
+#         layer_path: path to the output h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
+#         debug: if True, only process the first 300 frames.
+#         height: height of the image.
+#         width: width of the image.
+#     Output:
+#         A h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
+#     '''
+#     frame_indexes = frame_indexes_per_layer[layer_index]
+#     if debug:
+#         frame_indexes = frame_indexes[:300]
+#     print(len(frame_indexes))
+#     layer = np.zeros((height, width, len(frame_indexes)), dtype=np.uint16)
+#     with h5py.File(raw_path,'r') as f:
+#         for i, frame_index in enumerate(frame_indexes):
+#             layer[:,:,i] = f.get(f'{frame_index//10000+1}')[:,:,frame_index%10000]
     
-    if os.path.exists(layer_path):
-        with h5py.File(layer_path,'a') as f:
-            dataset_name, data_shape, data_type = f'layer{layer_index}', layer.shape , layer.dtype 
-            if dataset_name in f:
-                del f[dataset_name]
-            dataset = f.create_dataset(dataset_name, data_shape, dtype=data_type)
-            dataset[:] = layer
-    else:
-        with h5py.File(layer_path,'w') as f:
-            dataset_name, data_shape, data_type = f'layer{layer_index}', layer.shape , layer.dtype 
-            if dataset_name in f:
-                del f[dataset_name]
-            dataset = f.create_dataset(dataset_name, data_shape, dtype=data_type)
-            dataset[:] = layer
+#     if os.path.exists(layer_path):
+#         with h5py.File(layer_path,'a') as f:
+#             dataset_name, data_shape, data_type = f'layer{layer_index}', layer.shape , layer.dtype 
+#             if dataset_name in f:
+#                 del f[dataset_name]
+#             dataset = f.create_dataset(dataset_name, data_shape, dtype=data_type)
+#             dataset[:] = layer
+#     else:
+#         with h5py.File(layer_path,'w') as f:
+#             dataset_name, data_shape, data_type = f'layer{layer_index}', layer.shape , layer.dtype 
+#             if dataset_name in f:
+#                 del f[dataset_name]
+#             dataset = f.create_dataset(dataset_name, data_shape, dtype=data_type)
+#             dataset[:] = layer
 
 
 def check_layer(layer_path, layer_index, save_dir = '/om2/user/zgwang/light_sheet_imaging/image'):
@@ -166,29 +166,112 @@ def check_layer(layer_path, layer_index, save_dir = '/om2/user/zgwang/light_shee
 #     plt.savefig('/om2/user/zgwangz/zeguan/t50.png')
 
 
-def process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, video_initial_drops = 30, debug = False):
-    '''
-    Process all the data from one camera.
-    Input:
-        meta_data_path: path to the metafile.
-        input_nrrd_path: path to the nrrd file.
-        raw_path: path to the output h5 file with 21 datasets, one for each chunk, named as f['{chunk_index}']
-        layer_path: path to the output h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
-    Output: 
-        A h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
-    '''
+# def process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, video_initial_drops = 30, debug = False):
+#     '''
+#     Process all the data from one camera.
+#     Input:
+#         meta_data_path: path to the metafile.
+#         input_nrrd_path: path to the nrrd file.
+#         raw_path: path to the output h5 file with 21 datasets, one for each chunk, named as f['{chunk_index}']
+#         layer_path: path to the output h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
+#     Output: 
+#         A h5 file with 30 datasets, one for each layer, named as f['layer{layer_index}']
+#     '''
 
-    frame_numers = retrieve_framenumbers(meta_data_path)
-    frame_indexes_per_layer = assign_layer(frame_numers, video_initial_drops)
+#     frame_numers = retrieve_framenumbers(meta_data_path)
+#     frame_indexes_per_layer = assign_layer(frame_numers, video_initial_drops)
+#     frame_len = len(frame_numers)
 
-    # # Convert nrrd to h5
-    # for chunk_index in range(1,22):
-    #     nrrd_to_h5(input_nrrd_path.format(chunk_index), chunk_index, raw_path)
+#     # # Convert nrrd to h5
+#     # for chunk_index in range(1,22):
+#     #     nrrd_to_h5(input_nrrd_path.format(chunk_index), chunk_index, raw_path)
+
+#     height = 256
+#     width = 1280
+#     raw_frames = np.zeros((height, width, frame_len), dtype=np.uint16)
+
+#     with h5py.File(raw_path,'r') as f:
+#         for i in range(frame_len):
+#             raw_frames[:,:,i] = f.get(f'{i//10000+1}')[:,:,i%10000]
+#     print('finish reading all raw frames')
+
+#     # Reorganize the layers
+#     for layer_index in range(_PERIOD):
+#         print('processing layer', layer_index)
+#         # process_layer(layer_index, frame_indexes_per_layer, raw_path, layer_path.format(layer_index), debug = debug)
+        
+#         frame_indexes = frame_indexes_per_layer[layer_index]
+
+#         if debug:
+#             frame_indexes = frame_indexes[:300]
+#         print(len(frame_indexes))
+#         layer = np.zeros((height, width, len(frame_indexes)), dtype=np.uint16)
+
+#         for i, frame_index in enumerate(frame_indexes):
+#             layer[:,:,i] = raw_frames[:,:,frame_index]
+
+#         with h5py.File(layer_path.fourmat(layer_index),'w') as f:
+#             dataset_name, data_shape, data_type = f'layer{layer_index}', layer.shape , layer.dtype 
+#             if dataset_name in f:
+#                 del f[dataset_name]
+#             dataset = f.create_dataset(dataset_name, data_shape, dtype=data_type)
+#             dataset[:] = layer
+
+def process_one_camera(meta_data_path, input_nrrd_path, raw_path, layer_path, video_initial_drops=30, debug=False):
+    frame_numbers = retrieve_framenumbers(meta_data_path)
+    frame_indexes_per_layer = assign_layer(frame_numbers, video_initial_drops)
+    frame_len = len(frame_numbers)
+
+    height = 256
+    width = 1280
+    raw_frames = np.zeros((height, width, frame_len), dtype=np.uint16)
+
+    # read all raw frames from nrrd chunks
+    total_chunks = 21
+    chunk_size = 10000
+
+    for chunk_index in range(1, total_chunks + 1):
+        nrrd_data, _ = nrrd.read(input_nrrd_path.format(chunk_index))
+        
+        # Transpose the data
+        nrrd_data = np.transpose(nrrd_data, (1, 0, 2))
+        
+        # Calculate start and end positions for the chunk in the raw_frames
+        start_idx = (chunk_index - 1) * chunk_size
+        end_idx = chunk_index * chunk_size
+
+        # Insert the data into raw_frames
+        raw_frames[:, :, start_idx:end_idx] = nrrd_data
+
+        print(f'Read chunk {chunk_index}/{total_chunks}')
+
+
+    # # Read raw frames from h5
+    # with h5py.File(raw_path, 'r') as f:
+    #     for i in range(frame_len):
+    #         raw_frames[:, :, i] = f.get(f'{i//10000 + 1}')[:, :, i % 10000]
+    #         if i % 1 == 0:
+    #             print('reading...', i)
+
+    print('Finished reading all raw frames')
 
     # Reorganize the layers
     for layer_index in range(_PERIOD):
-        print('processing layer', layer_index)
-        process_layer(layer_index, frame_indexes_per_layer, raw_path, layer_path.format(layer_index), debug = debug)
+        print('Processing layer', layer_index)
+        
+        frame_indexes = frame_indexes_per_layer[layer_index]
+        
+        if debug:
+            frame_indexes = frame_indexes[:300]
+
+        # Get slices of the raw frames corresponding to the frame_indexes
+        layer_frames = raw_frames[:, :, frame_indexes]
+
+        with h5py.File(layer_path.format(layer_index), 'w') as f:
+            dataset_name = f'layer{layer_index}'
+            if dataset_name in f:
+                del f[dataset_name]
+            f.create_dataset(dataset_name, data=layer_frames)
 
 
 if __name__ == '__main__':
@@ -226,10 +309,19 @@ if __name__ == '__main__':
 
     # 0826 fish3_1 camera1, save to 30 hdf5 files
     # nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3
-    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish3_1.xiseq'
-    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3/fish3_1_{}.nrrd'
-    raw_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/raw.h5'
-    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/layer_{}.h5'
+    # meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish3_1.xiseq'
+    # input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3/fish3_1_{}.nrrd'
+    # raw_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/raw.h5'
+    # layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/layer_{}.h5'
+    # # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = True)
+    # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = False)
+
+    # 0826 fish3_1 camera2, save to 30 hdf5 files
+    # nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3
+    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish3_1.xiseq'
+    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish3/fish3_1_{}.nrrd'
+    raw_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/raw.h5'
+    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/layer_{}.h5'
     # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = True)
     process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = False)
     
