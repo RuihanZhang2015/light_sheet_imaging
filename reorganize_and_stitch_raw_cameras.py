@@ -173,7 +173,7 @@ def stitching(raw_cam1, frame_indexes_per_layer_cam1,
     layer_order = np.roll(range(PERIOD), cam1_onset_layer)
 
     for layer_final, layer_cam1 in enumerate(layer_order):
-        print(f'Stitching {layer_final}/{len(layer_order)}')
+        print(f'Stitching {layer_final}/{len(layer_order)-1}')
 
         layer_cam2 = (layer_cam1 + cam2_onset_layer - cam1_onset_layer) % 30
         t1, t2 = t0, t0 + cam2_onset_time - cam1_onset_time
@@ -191,37 +191,91 @@ def stitching(raw_cam1, frame_indexes_per_layer_cam1,
         combined_vol = combine_two_volumes(vol1, vol2, stitch_function, desired_len)
         save_combined_volume(out_path, combined_vol, layer_final)
 
+def stitching_from_h5(layer_path_cam1, layer_path_cam2,
+              out_path,
+              cam1_onset_layer, cam1_onset_time,
+              cam2_onset_layer, cam2_onset_time,
+              stitch_function,
+              offset_time, desired_len):
+    '''... (same docstring) ...'''
+    t0 = cam1_onset_time + offset_time
+    layer_order = np.roll(range(PERIOD), cam1_onset_layer)
+
+    for layer_final, layer_cam1 in enumerate(layer_order):
+        print(f'Stitching {layer_final}/{len(layer_order)-1}')
+
+        layer_cam2 = (layer_cam1 + cam2_onset_layer - cam1_onset_layer) % 30
+        t1, t2 = t0, t0 + cam2_onset_time - cam1_onset_time
+
+        # layer_frames = raw_frames[:, :, frame_indexes]
+        with h5py.File(layer_path_cam1.format(layer_cam1), 'r') as f:
+                    vol1 = f[f'layer{layer_cam1}'][:]
+
+        with h5py.File(layer_path_cam2.format(layer_cam2), 'r') as f:
+                    vol2 = f[f'layer{layer_cam2}'][:]
+
+        vol1 = vol1[:, :, t1:t1+desired_len]
+        vol2 = vol2[:, :, t2:t2+desired_len]
+
+        combined_vol = combine_two_volumes(vol1, vol2, stitch_function, desired_len)
+        save_combined_volume(out_path, combined_vol, layer_final)
+
 ########################################################################################
 
 if __name__ == '__main__':
 
-    #### reorganize ####
-    # 0826 fish3_1 camera1, save to 30 hdf5 files
-    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish3_1.xiseq'
-    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3/fish3_1_{}.nrrd'
-    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/layer_{}.h5'
-    raw_frames_1, frame_indexes_per_layer_1, avg_intensities_array_1 = process_one_camera(meta_data_path,input_nrrd_path,layer_path, debug = False)
+    # #### reorganize ####
+    # # 0826 fish3_1 camera1, save to 30 hdf5 files
+    # meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/xiseq files/fish3_1.xiseq'
+    # input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3/fish3_1_{}.nrrd'
+    # layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/layer_{}.h5'
+    # raw_frames_1, frame_indexes_per_layer_1, avg_intensities_array_1 = process_one_camera(meta_data_path,input_nrrd_path,layer_path, debug = False)
 
-    # 0826 fish3_1 camera2, save to 30 hdf5 files
-    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish3_1.xiseq'
-    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish3/fish3_1_{}.nrrd'
-    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/layer_{}.h5'
-    raw_frames_2, frame_indexes_per_layer_2, avg_intensities_array_2 = process_one_camera(meta_data_path,input_nrrd_path,layer_path, debug = False)
+    # # 0826 fish3_1 camera2, save to 30 hdf5 files
+    # meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish3_1.xiseq'
+    # input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish3/fish3_1_{}.nrrd'
+    # layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/layer_{}.h5'
+    # raw_frames_2, frame_indexes_per_layer_2, avg_intensities_array_2 = process_one_camera(meta_data_path,input_nrrd_path,layer_path, debug = False)
     
     ##### stitch ####
     stitch_out_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/stitched/layer_{}.h5'
-    
     os.makedirs(os.path.dirname(stitch_out_path), exist_ok=True)
-
+    
     from custom_function.stitch2cam_0826fish5 import stitch2cam_0826fish5 as stitch_fn
-    onset_time_list_1 = compute_laser_onset_per_layer(avg_intensities_array_1)
-    onset_time_list_2 = compute_laser_onset_per_layer(avg_intensities_array_2)
-    cam1_onset_layer, cam1_onset_time = find_laser_onset(onset_time_list_1)
-    cam2_onset_layer, cam2_onset_time = find_laser_onset(onset_time_list_2)
-    stitching(raw_frames_1, frame_indexes_per_layer_1,
-              raw_frames_2, frame_indexes_per_layer_2, 
-              stitch_out_path,
-              cam1_onset_layer, cam1_onset_time, 
-              cam2_onset_layer, cam2_onset_time,
-              stitch_fn,
-              offset_time=100, desired_len=6700)
+    
+    READ_from_H5 = True
+    if READ_from_H5:
+        layer_path_cam1 = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera1/layer_{}.h5'
+        layer_path_cam2 = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/layer_{}.h5'
+        
+        with h5py.File(f'{os.path.dirname(layer_path_cam1)}/average_intensities.h5', 'r') as f:
+            avg_intensities_array_1 = f['avg_intensities'][:]
+            print('Finish reading avg intensity 1')
+
+        with h5py.File(f'{os.path.dirname(layer_path_cam2)}/average_intensities.h5', 'r') as f:
+            avg_intensities_array_2 = f['avg_intensities'][:]
+            print('Finish reading avg intensity 2')
+
+        onset_time_list_1 = compute_laser_onset_per_layer(avg_intensities_array_1)
+        onset_time_list_2 = compute_laser_onset_per_layer(avg_intensities_array_2)
+        cam1_onset_layer, cam1_onset_time = find_laser_onset(onset_time_list_1)
+        cam2_onset_layer, cam2_onset_time = find_laser_onset(onset_time_list_2)    
+        
+        stitching_from_h5(layer_path_cam1, layer_path_cam2,
+                          stitch_out_path,
+                          cam1_onset_layer, cam1_onset_time, 
+                          cam2_onset_layer, cam2_onset_time,
+                          stitch_fn,
+                          offset_time=100, desired_len=6700)
+    else:
+        onset_time_list_1 = compute_laser_onset_per_layer(avg_intensities_array_1)
+        onset_time_list_2 = compute_laser_onset_per_layer(avg_intensities_array_2)
+        cam1_onset_layer, cam1_onset_time = find_laser_onset(onset_time_list_1)
+        cam2_onset_layer, cam2_onset_time = find_laser_onset(onset_time_list_2)
+        stitching(raw_frames_1, frame_indexes_per_layer_1,
+                raw_frames_2, frame_indexes_per_layer_2, 
+                stitch_out_path,
+                cam1_onset_layer, cam1_onset_time, 
+                cam2_onset_layer, cam2_onset_time,
+                stitch_fn,
+                offset_time=100, desired_len=6700)
