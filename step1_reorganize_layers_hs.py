@@ -226,6 +226,11 @@ def process_one_camera(meta_data_path, input_nrrd_path, raw_path, layer_path, vi
     width = 1280
     raw_frames = np.zeros((height, width, frame_len), dtype=np.uint16)
 
+    layer_folder_path = os.path.dirname(layer_path)
+    print('layer_folder_path', layer_folder_path)
+    os.makedirs(layer_folder_path, exist_ok=True)
+
+
     # read all raw frames from nrrd chunks
     total_chunks = 21
     chunk_size = 10000
@@ -254,6 +259,15 @@ def process_one_camera(meta_data_path, input_nrrd_path, raw_path, layer_path, vi
     #             print('reading...', i)
 
     print('Finished reading all raw frames')
+    
+    num_frames = len(frame_indexes_per_layer[0])
+
+    # If in debug mode, we consider only 300 frames
+    if debug:
+        num_frames = 300
+
+    # Initialize a 2D array to store the average intensities
+    avg_intensities_array = np.zeros((num_frames, _PERIOD))
 
     # Reorganize the layers
     for layer_index in range(_PERIOD):
@@ -267,12 +281,21 @@ def process_one_camera(meta_data_path, input_nrrd_path, raw_path, layer_path, vi
         # Get slices of the raw frames corresponding to the frame_indexes
         layer_frames = raw_frames[:, :, frame_indexes]
 
+        # Calculate average intensities for each frame in the current layer
+        avg_intensities = np.mean(layer_frames, axis=(0, 1))
+        avg_intensities_array[:, layer_index] = avg_intensities
+
         with h5py.File(layer_path.format(layer_index), 'w') as f:
             dataset_name = f'layer{layer_index}'
             if dataset_name in f:
                 del f[dataset_name]
             f.create_dataset(dataset_name, data=layer_frames)
 
+    # Save the 2D array of average intensities to a separate HDF5 file
+    with h5py.File(f'{layer_folder_path}/average_intensities.h5', 'w') as f:
+        if 'avg_intensities' in f:
+            del f['avg_intensities']
+        f.create_dataset('avg_intensities', data=avg_intensities_array)
 
 if __name__ == '__main__':
 
@@ -318,11 +341,11 @@ if __name__ == '__main__':
 
     # 0826 fish3_1 camera2, save to 30 hdf5 files
     # nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera1/nrrd/fish3
-    meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish3_1.xiseq'
-    input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish3/fish3_1_{}.nrrd'
-    raw_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/raw.h5'
-    layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/layer_{}.h5'
-    # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = True)
-    process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = False)
+    # meta_data_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/xiseq files/fish3_1.xiseq'
+    # input_nrrd_path = '/nese/mit/group/boydenlab/symvou/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/camera2/nrrd/fish3/fish3_1_{}.nrrd'
+    # raw_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/raw.h5'
+    # layer_path = '/nese/mit/group/boydenlab/zgwang/FISHDATA/VOLTAGE/20230826_gal4_3xPosi2_xCaspr_F2_5-6dpf_40us_4980us_UV/fish3_1/camera2/layer_{}.h5'
+    # # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = True)
+    # process_one_camera(meta_data_path,input_nrrd_path,raw_path,layer_path, debug = False)
     
     
