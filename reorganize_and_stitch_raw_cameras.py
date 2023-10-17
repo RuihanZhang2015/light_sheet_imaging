@@ -103,7 +103,8 @@ def process_one_camera(meta_data_path, input_nrrd_path, layer_path, video_initia
     if debug:
         num_frames = 300
 
-    avg_intensities_array = np.zeros((PERIOD, num_frames))
+    first_frames = 300
+    avg_intensities_array = np.zeros((PERIOD, first_frames))
 
     for layer_index in range(PERIOD):
         print(f'Reorganize layer {layer_index}')
@@ -113,8 +114,8 @@ def process_one_camera(meta_data_path, input_nrrd_path, layer_path, video_initia
             frame_indexes = frame_indexes[:300]
 
         layer_frames = raw_frames[:, :, frame_indexes]
-        avg_intensities = np.mean(layer_frames, axis=(0, 1))
-        avg_intensities_array[layer_index, :] = avg_intensities
+        avg_intensities = np.mean(layer_frames, axis=(0, 1),keepdims=False)
+        avg_intensities_array[layer_index, :first_frames] = avg_intensities[:first_frames]
 
         with h5py.File(layer_path.format(layer_index), 'w') as f:
             dataset_name = f'layer{layer_index}'
