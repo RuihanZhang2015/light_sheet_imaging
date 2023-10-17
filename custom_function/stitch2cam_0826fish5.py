@@ -26,6 +26,6 @@ def stitch2cam_0826fish5(
     img2_final[:,shift:] = im2[:,:-shift]
 
     # Stitch
-    stitched = np.concatenate((im2,im1),axis=0)
+    stitched = np.concatenate((img2_final,im1),axis=0)
     return stitched.astype(np.uint16)
     
